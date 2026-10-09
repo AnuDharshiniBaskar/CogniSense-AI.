@@ -1,1 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CogniSense AI | Cognitive Task Lab</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-mark">CS</div>
+      <div class="brand-name">CogniSense <span>AI</span></div>
+      <p class="sidebar-copy">Cognitive Task Lab</p>
+      <nav>
+        <a class="nav-item active" href="#overview">◈ &nbsp; Overview</a>
+        <a class="nav-item" href="#assessment">◎ &nbsp; Start assessment</a>
+        <a class="nav-item" href="#history">▤ &nbsp; Session history</a>
+      </nav>
+      <div class="sidebar-note">
+        <div class="note-dot"></div>
+        <div><strong>Research demo</strong><small>Educational use only</small></div>
+      </div>
+    </aside>
 
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <h1>Understand your task performance.</h1>
+          <p class="subtitle">Explore how task difficulty relates to response time and accuracy.</p>
+        </div>
+        <div class="status-pill"><span></span> System ready</div>
+      </header>
+
+      <section class="hero-card" id="overview">
+        <div class="hero-copy">
+          <p class="eyebrow light">YOUR COGNITIVE WORKSPACE</p>
+          <h2>Measure. Reflect.<br><em>Adapt.</em></h2>
+          <p>Complete short memory and attention tasks, then review a transparent performance-based workload estimate.</p>
+          <a class="primary-btn" href="#assessment">Start a session <span>↗</span></a>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="brain-symbol">✳</div>
+          <div class="float-card fc-one"><span class="mini-icon">◷</span><div><small>Response time</small><strong>Tracked live</strong></div></div>
+          <div class="float-card fc-two"><span class="mini-icon">↗</span><div><small>Task strategy</small><strong>Adaptive</strong></div></div>
+        </div>
+      </section>
+
+      <section class="stat-grid">
+        <article class="stat-card"><div class="stat-icon violet">◎</div><p>Assessment types</p><strong>02</strong><small>Memory + attention</small></article>
+        <article class="stat-card"><div class="stat-icon mint">◷</div><p>Response time</p><strong>Live</strong><small>Measured per question</small></article>
+        <article class="stat-card"><div class="stat-icon amber">▥</div><p>Result tracking</p><strong>Local</strong><small>Saved in SQLite database</small></article>
+      </section>
+
+      <section class="content-grid" id="assessment">
+        <div class="panel assessment-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">INTERACTIVE EXPERIMENT</p><h2>Start an assessment</h2></div>
+            <span class="tag">~ 2 minutes</span>
+          </div>
+          <form id="setup-form">
+            <label for="participant">Participant name</label>
+            <input id="participant" name="participant" maxlength="60" placeholder="Enter a name or nickname" required>
+            <label for="task-type">Choose a cognitive task</label>
+            <select id="task-type">
+              <option value="Memory">Memory recall</option>
+              <option value="Attention">Selective attention</option>
+            </select>
+            <label for="difficulty">Starting difficulty</label>
+            <select id="difficulty">
+              <option value="Easy">Easy</option>
+              <option value="Moderate">Moderate</option>
+              <option value="Hard">Hard</option>
+            </select>
+            <button class="primary-btn full" type="submit">Begin assessment <span>→</span></button>
+          </form>
+          <div class="privacy-note">🔒 Demo data is stored locally in this project's SQLite database.</div>
+        </div>
+
+        <div class="panel task-panel" id="task-panel">
+          <div class="panel-heading"><div><p class="eyebrow">LIVE SESSION</p><h2 id="task-title">Ready when you are</h2></div><span class="round-icon">✳</span></div>
+          <div id="task-content" class="task-content empty-state">
+            <div class="empty-illustration">◎</div>
+            <h3>Your task appears here</h3>
+            <p>Choose a task and press “Begin assessment” to start.</p>
+          </div>
+          <div id="feedback" class="feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="result-section" id="results" hidden>
+        <div class="section-title"><div><p class="eyebrow">SESSION SUMMARY</p><h2>Your performance snapshot</h2></div><button id="new-session" class="secondary-btn">New session ↻</button></div>
+        <div class="result-grid">
+          <article class="result-card"><span>Accuracy</span><strong id="result-accuracy">—</strong><div class="progress"><span id="accuracy-bar"></span></div></article>
+          <article class="result-card"><span>Average response</span><strong id="result-time">—</strong><small>milliseconds per question</small></article>
+          <article class="result-card"><span>Performance-based estimate</span><strong id="result-workload">—</strong><small id="result-description">Not a clinical measurement</small></article>
+        </div>
+        <div class="insight-box"><div class="insight-symbol">✦</div><div><strong>Practice suggestion</strong><p id="suggestion"></p></div></div>
+        <p class="disclaimer">This is an educational prototype. Accuracy and response time are not sufficient to diagnose cognitive load, attention disorders, or any medical condition.</p>
+      </section>
+
+      <section class="panel history-panel" id="history">
+        <div class="panel-heading"><div><p class="eyebrow">RECENT ACTIVITY</p><h2>Session history</h2></div><button id="refresh-history" class="text-btn">Refresh ↻</button></div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Participant</th><th>Task</th><th>Difficulty</th><th>Accuracy</th><th>Avg. time</th><th>Estimate</th></tr></thead>
+            <tbody id="history-body"><tr><td colspan="6" class="empty-table">No saved sessions yet. Complete an assessment to see your results.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <footer>CogniSense AI <span>·</span> Cognitive Science Mini Project <span>·</span> Educational prototype</footer>
+    </main>
+  </div>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
