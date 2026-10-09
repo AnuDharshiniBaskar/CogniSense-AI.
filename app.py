@@ -6,11 +6,14 @@ from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
-DB_PATH = os.path.join(os.path.dirname(__file__), "cognisense.db")
+# On Render with a persistent disk, set COGNISENSE_DATA_DIR to the disk mount path.
+DATA_DIR = os.environ.get("COGNISENSE_DATA_DIR", os.path.dirname(os.path.abspath(__file__)))
+os.makedirs(DATA_DIR, exist_ok=True)
+DB_PATH = os.path.join(DATA_DIR, "cognisense.db")
 
-# Host PIN: only the host should know this.
-# Set it in Render: Environment > Add Environment Variable
-#   Key: COGNISENSE_HOST_PIN   Value: your-secret-pin
+# Host PIN: only the host should know this. Set your own before running:
+#   Windows (cmd):  set COGNISENSE_HOST_PIN=your-secret
+#   Windows (PS):   $env:COGNISENSE_HOST_PIN="your-secret"
 HOST_PIN = os.environ.get("COGNISENSE_HOST_PIN", "cognisense-host")
 ALLOWED_TASKS = {"Memory", "Attention", "Quiz"}
 
