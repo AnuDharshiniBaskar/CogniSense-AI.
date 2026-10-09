@@ -3,7 +3,13 @@
   const SESSION_LENGTH = 8;
   const QUIZ_LENGTH = 10;
   const QUIZ_SECONDS = 15;
-  const MEMORY_LENGTH = { Easy: 3, Moderate: 4, Hard: 5 };
+  const MEMORY_LEVELS = {
+    Easy:     { length: 3, showMs: 2500, reverse: false, chars: 'digits' },
+    Moderate: { length: 4, showMs: 1800, reverse: false, chars: 'digits' },
+    Hard:     { length: 6, showMs: 1200, reverse: true,  chars: 'mixed' }
+  };
+  const DIGITS = ['1','2','3','4','5','6','7','8','9'];
+  const MIXED = ['A','B','C','D','E','F','G','H','J','K','M','N','P','Q','R','T','W','X','Y','Z','2','3','4','5','6','7','8','9'];
   const ATTENTION_OPTIONS = { Easy: 3, Moderate: 4, Hard: 5 };
   const REVEAL_MS = 1800;
   const NEXT_MS = 1800;
@@ -66,17 +72,43 @@
   }
 
   function makeMemory(diff) {
-    const n = MEMORY_LENGTH[diff];
-    const digits = shuffle([1,2,3,4,5,6,7,8,9]).slice(0, n);
-    const answer = digits.join(' ');
-    const opts = new Set([answer]);
-    for (let g = 0; opts.size < 4 && g < 500; g++) {
-      const a = [...digits];
-      const i = randInt(n), j = randInt(n);
-      [a[i], a[j]] = [a[j], a[i]];
-      opts.add(a.join(' '));
+    const cfg = MEMORY_LEVELS[diff];
+    const pool = cfg.chars === 'mixed' ? MIXED : DIGITS;
+    const items = shuffle(pool).slice(0, cfg.length);
+    const target = cfg.reverse ? [...items].reverse() : items;
+    const answer = target.join(' ');
+
+    const wrong = new Set();
+    // Common mistake: forgetting to reverse the order
+    if (cfg.reverse) wrong.add(items.join(' '));
+    // Adjacent swaps: look almost right
+    for (let k = 0; k < cfg.length - 1; k++) {
+      const a = [...target];
+      [a[k], a[k + 1]] = [a[k + 1], a[k]];
+      wrong.add(a.join(' '));
     }
-    return { type: 'memory', prompt: 'Remember the sequence, then choose it.', sequence: answer, answer, options: shuffle([...opts]) };
+    // One symbol changed
+    for (let g = 0; wrong.size < 12 && g < 300; g++) {
+      const a = [...target];
+      const i = randInt(cfg.length);
+      let c;
+      do { c = pick(pool); } while (target.includes(c));
+      a[i] = c;
+      wrong.add(a.join(' '));
+    }
+    wrong.delete(answer);
+    const options = shuffle([answer, ...shuffle([...wrong]).slice(0, 3)]);
+
+    return {
+      type: 'memory',
+      prompt: cfg.reverse
+        ? 'Remember the sequence. Choose it in REVERSE order.'
+        : 'Remember the sequence, then choose it.',
+      sequence: items.join(' '),
+      showMs: cfg.showMs,
+      answer,
+      options
+    };
   }
 
   function makeAttention(diff) {
@@ -127,24 +159,30 @@
       <div class="feedback" id="fb"></div>`;
 
     const box = $('opts');
-    q.options.forEach(opt => {
-      const b = document.createElement('button');
-      b.className = 'option' + (q.type === 'attention' ? ' ink' : '');
-      b.textContent = opt;
-      b.dataset.value = opt;
-      b.addEventListener('click', () => answer(opt));
-      box.appendChild(b);
-    });
+    const drawOptions = () => {
+      q.options.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'option' + (q.type === 'attention' ? ' ink' : '');
+        b.textContent = opt;
+        b.dataset.value = opt;
+        b.addEventListener('click', () => answer(opt));
+        box.appendChild(b);
+      });
+    };
 
     if (q.type === 'memory') {
-      setEnabled(false);
+      // Options stay hidden while the sequence is visible; they appear once it hides.
       timers.push(setTimeout(() => {
         $('seq').textContent = '•••';
         $('hint').textContent = 'Now choose the sequence you remember.';
-        setEnabled(true);
+        drawOptions();
         startedAt = performance.now();
-      }, REVEAL_MS));
-    } else if (q.type === 'quiz') {
+      }, q.showMs));
+    } else {
+      drawOptions();
+    }
+
+    if (q.type === 'quiz') {
       const steps = QUIZ_SECONDS * 10;
       let left = steps;
       startedAt = performance.now();
