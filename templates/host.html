@@ -1,1 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CogniSense AI | Host</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <main class="main-content host-main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">HOST ONLY</p>
+          <h1>Participant results</h1>
+          <p class="subtitle">Player names are visible only on this page.</p>
+        </div>
+      </header>
 
+      <section class="panel">
+        <div id="gate">
+          <label for="pin">Host PIN</label>
+          <input id="pin" type="password" placeholder="Enter host PIN">
+          <button id="unlock" class="primary-btn full" type="button">Unlock <span>→</span></button>
+          <p id="gate-msg" class="disclaimer"></p>
+        </div>
+
+        <div id="board" hidden>
+          <div class="panel-heading">
+            <div><p class="eyebrow">ALL SESSIONS</p><h2>Who played</h2></div>
+            <button id="refresh" class="text-btn" type="button">Refresh ↻</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Participant</th><th>Task</th><th>Difficulty</th><th>Accuracy</th><th>Avg. time</th><th>Estimate</th><th>When</th></tr></thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let pin = '';
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    async function loadRows() {
+      const response = await fetch('/api/history?limit=200', { headers: { 'X-Host-Pin': pin } });
+      if (response.status === 403) return false;
+      const rows = await response.json();
+      $('rows').innerHTML = rows.length
+        ? rows.map(r => `<tr>
+            <td>${escapeHtml(r.participant)}</td><td>${escapeHtml(r.task_type)}</td>
+            <td>${escapeHtml(r.difficulty)}</td><td>${Math.round(Number(r.accuracy))}%</td>
+            <td>${(Number(r.avg_response_ms) / 1000).toFixed(2)}s</td>
+            <td><span class="workload-badge">${escapeHtml(r.workload)}</span></td>
+            <td>${escapeHtml(r.created_at)}</td></tr>`).join('')
+        : '<tr><td colspan="7" class="empty-table">No sessions yet.</td></tr>';
+      return true;
+    }
+
+    $('unlock').addEventListener('click', async () => {
+      pin = $('pin').value;
+      const ok = await loadRows().catch(() => false);
+      if (ok) {
+        $('gate').hidden = true;
+        $('board').hidden = false;
+        $('gate-msg').textContent = '';
+      } else {
+        $('gate-msg').textContent = 'Wrong PIN or server not reachable.';
+      }
+    });
+
+    $('pin').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('unlock').click(); });
+    $('refresh').addEventListener('click', () => loadRows());
+  </script>
+</body>
+</html>
