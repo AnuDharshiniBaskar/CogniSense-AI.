@@ -1,83 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CogniSense AI | Host</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CogniSense AI | Cognitive Task Lab</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <div class="app-shell">
-    <main class="main-content host-main">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">HOST ONLY</p>
-          <h1>Participant results</h1>
-          <p class="subtitle">Player names are visible only on this page.</p>
-        </div>
-      </header>
 
-      <section class="panel">
-        <div id="gate">
-          <label for="pin">Host PIN</label>
-          <input id="pin" type="password" placeholder="Enter host PIN">
-          <button id="unlock" class="primary-btn full" type="button">Unlock <span>→</span></button>
-          <p id="gate-msg" class="disclaimer"></p>
-        </div>
+<header class="site">
+  <div class="wrap"><div class="brand">CogniSense <span>AI</span></div></div>
+</header>
 
-        <div id="board" hidden>
-          <div class="panel-heading">
-            <div><p class="eyebrow">ALL SESSIONS</p><h2>Who played</h2></div>
-            <button id="refresh" class="text-btn" type="button">Refresh ↻</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Participant</th><th>Task</th><th>Difficulty</th><th>Accuracy</th><th>Avg. time</th><th>Estimate</th><th>When</th></tr></thead>
-              <tbody id="rows"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+<div class="wrap">
 
-  <script>
-    const $ = (id) => document.getElementById(id);
-    let pin = '';
+  <section class="hero">
+    <h1>Test how your mind works.</h1>
+    <p>Short memory, attention and quiz rounds. See the correct answer right after every question.</p>
+  </section>
 
-    function escapeHtml(value) {
-      return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-    }
+  <section class="card" id="play">
+    <h2>Choose a round</h2>
+    <p class="muted">Pick a task and difficulty, then start.</p>
 
-    async function loadRows() {
-      const response = await fetch('/api/history?limit=200', { headers: { 'X-Host-Pin': pin } });
-      if (response.status === 403) return false;
-      const rows = await response.json();
-      $('rows').innerHTML = rows.length
-        ? rows.map(r => `<tr>
-            <td>${escapeHtml(r.participant)}</td><td>${escapeHtml(r.task_type)}</td>
-            <td>${escapeHtml(r.difficulty)}</td><td>${Math.round(Number(r.accuracy))}%</td>
-            <td>${(Number(r.avg_response_ms) / 1000).toFixed(2)}s</td>
-            <td><span class="workload-badge">${escapeHtml(r.workload)}</span></td>
-            <td>${escapeHtml(r.created_at)}</td></tr>`).join('')
-        : '<tr><td colspan="7" class="empty-table">No sessions yet.</td></tr>';
-      return true;
-    }
+    <div class="tasks" id="tasks">
+      <button class="task-btn active" data-task="Memory"><strong>Memory recall</strong><small>Remember the number sequence</small></button>
+      <button class="task-btn" data-task="Attention"><strong>Attention</strong><small>Click the ink colour, not the word</small></button>
+      <button class="task-btn" data-task="Quiz"><strong>Cognitive quiz</strong><small>15 seconds per question</small></button>
+    </div>
 
-    $('unlock').addEventListener('click', async () => {
-      pin = $('pin').value;
-      const ok = await loadRows().catch(() => false);
-      if (ok) {
-        $('gate').hidden = true;
-        $('board').hidden = false;
-        $('gate-msg').textContent = '';
-      } else {
-        $('gate-msg').textContent = 'Wrong PIN or server not reachable.';
-      }
-    });
+    <label class="field"><span>Your name</span><input id="name" maxlength="60" placeholder="Enter a name or nickname"><small>Only the host can see names.</small></label>
+    <div class="controls">
+      <select id="difficulty" aria-label="Difficulty">
+        <option value="Easy">Easy</option>
+        <option value="Moderate" selected>Moderate</option>
+        <option value="Hard">Hard</option>
+      </select>
+      <button class="primary" id="start">Start round</button>
+    </div>
 
-    $('pin').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('unlock').click(); });
-    $('refresh').addEventListener('click', () => loadRows());
-  </script>
+    <div class="stage" id="stage">
+      <div class="idle">Your round will appear here.</div>
+    </div>
+  </section>
+
+  <section class="card about">
+    <h2>About this project</h2>
+    <p class="muted">A small cognitive science project exploring how task difficulty relates to response time and accuracy.</p>
+    <ul>
+      <li>Response time is measured for every question.</li>
+      <li>The workload estimate is a simple demo heuristic, not a clinical measure.</li>
+      <li>Your name and results are shared only with the host.</li>
+    </ul>
+  </section>
+
+</div>
+
+<footer>CogniSense AI · Cognitive Science Mini Project · Educational prototype</footer>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
