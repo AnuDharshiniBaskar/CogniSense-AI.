@@ -1,82 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CogniSense AI | Cognitive Task Lab</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CogniSense AI | Cognitive Task Lab</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand-mark">CS</div>
-      <div class="brand-name">CogniSense <span>AI</span></div>
-      <p class="sidebar-copy">Cognitive Task Lab</p>
-      <nav>
-        <a class="nav-item active" href="#overview">◈ &nbsp; Overview</a>
-        <a class="nav-item" href="#assessment">◎ &nbsp; Start assessment</a>
-      </nav>
-      <div class="sidebar-note">
-        <div class="note-dot"></div>
-        <div><strong>Research demo</strong><small>Educational use only</small></div>
-      </div>
-    </aside>
 
-    <main class="main-content">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">COGNITIVE SCIENCE · MINI PROJECT</p>
-          <h1>Understand your task performance.</h1>
-          <p class="subtitle">Explore how task difficulty relates to response time and accuracy.</p>
-        </div>
-        <div class="status-pill"><span></span> System ready</div>
-      </header>
+<header class="site">
+  <div class="wrap"><div class="brand">CogniSense <span>AI</span></div></div>
+</header>
 
-      <section class="hero-card" id="overview">
-        <div class="hero-copy">
-          <p class="eyebrow light">YOUR COGNITIVE WORKSPACE</p>
-          <h2>Measure. Reflect.<br><em>Adapt.</em></h2>
-          <p>Play memory, attention and quiz rounds. See the right answer after every question.</p>
-          <a class="primary-btn" href="#assessment">Start a session <span>↗</span></a>
-        </div>
-        <div class="hero-art" aria-hidden="true">
-          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-          <div class="brain-symbol">✳</div>
-          <div class="float-card fc-one"><span class="mini-icon">◷</span><div><small>Response time</small><strong>Tracked live</strong></div></div>
-          <div class="float-card fc-two"><span class="mini-icon">↗</span><div><small>Task strategy</small><strong>Adaptive</strong></div></div>
-        </div>
-      </section>
+<div class="wrap">
 
-      <section class="stat-grid">
-        <article class="stat-card"><div class="stat-icon violet">◎</div><p>Task types</p><strong>03</strong><small>Memory · Attention · Quiz</small></article>
-        <article class="stat-card"><div class="stat-icon mint">◷</div><p>Response time</p><strong>Live</strong><small>Measured per question</small></article>
-        <article class="stat-card"><div class="stat-icon amber">🔒</div><p>Player names</p><strong>Private</strong><small>Visible only to the host</small></article>
-      </section>
+  <section class="hero">
+    <h1>Test how your mind works.</h1>
+    <p>Short memory, attention and quiz rounds. See the correct answer right after every question.</p>
+  </section>
 
-      <section class="content-grid" id="assessment">
-        <div class="panel assessment-panel">
-          <div class="panel-heading">
-            <div><p class="eyebrow">INTERACTIVE EXPERIMENT</p><h2>Start an assessment</h2></div>
-            <span class="tag">~ 2 minutes</span>
-          </div>
-          <form id="setup-form">
-            <label for="participant">Your name</label>
-            <input id="participant" name="participant" maxlength="60" placeholder="Enter a name or nickname" required>
-            <label for="task-type">Choose a task</label>
-            <select id="task-type">
-              <option value="Memory">Memory recall</option>
-              <option value="Attention">Attention (Stroop colour task)</option>
-              <option value="Quiz">Cognitive science quiz (15s timer)</option>
-            </select>
-            <label for="difficulty">Difficulty (Memory and Attention)</label>
-            <select id="difficulty">
-              <option value="Easy">Easy</option>
-              <option value="Moderate">Moderate</option>
-              <option value="Hard">Hard</option>
-            </select>
-            <button class="primary-btn full" type="submit">Begin assessment <span>→</span></button>
-          </form>
-          <div class="privacy-note">🔒 Your name is shared only with the host.</div>
-        </div>
+  <section class="card" id="play">
+    <h2>Choose a round</h2>
+    <p class="muted">Pick a task and difficulty, then start.</p>
 
-        <div class="panel task-panel" id="task-panel">
+    <div class="tasks" id="tasks">
+      <button class="task-btn active" data-task="Memory"><strong>Memory recall</strong><small>Remember the number sequence</small></button>
+      <button class="task-btn" data-task="Attention"><strong>Attention</strong><small>Click the ink colour, not the word</small></button>
+      <button class="task-btn" data-task="Quiz"><strong>Cognitive quiz</strong><small>15 seconds per question</small></button>
+    </div>
+
+    <label class="field"><span>Your name</span><input id="name" maxlength="60" placeholder="Enter a name or nickname"><small>Only the host can see names.</small></label>
+    <div class="controls">
+      <select id="difficulty" aria-label="Difficulty">
+        <option value="Easy">Easy</option>
+        <option value="Moderate" selected>Moderate</option>
+        <option value="Hard">Hard</option>
+      </select>
+      <button class="primary" id="start">Start round</button>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="idle">Your round will appear here.</div>
+    </div>
+  </section>
+
+  <section class="card about">
+    <h2>About this project</h2>
+    <p class="muted">A small cognitive science project exploring how task difficulty relates to response time and accuracy.</p>
+    <ul>
+      <li>Response time is measured for every question.</li>
+      <li>The workload estimate is a simple demo heuristic, not a clinical measure.</li>
+      <li>Your name and results are shared only with the host.</li>
+    </ul>
+  </section>
+
+</div>
+
+<footer>CogniSense AI · Cognitive Science Mini Project · Educational prototype</footer>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
