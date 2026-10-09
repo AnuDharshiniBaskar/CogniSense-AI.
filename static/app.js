@@ -11,6 +11,7 @@
   const DIGITS = ['1','2','3','4','5','6','7','8','9'];
   const MIXED = ['A','B','C','D','E','F','G','H','J','K','M','N','P','Q','R','T','W','X','Y','Z','2','3','4','5','6','7','8','9'];
   const ATTENTION_OPTIONS = { Easy: 3, Moderate: 4, Hard: 5 };
+  const ATTENTION_SHOW = { Easy: 1500, Moderate: 1000, Hard: 700 };
   const REVEAL_MS = 1800;
   const NEXT_MS = 1800;
 
@@ -40,7 +41,22 @@
     { prompt: "Which tool is a subjective self-report of mental workload?", options: ["NASA-TLX", "EEG", "fMRI", "Heart rate variability"], answer: "NASA-TLX" },
     { prompt: "Priming occurs when:", options: ["Exposure to one stimulus influences the response to another", "A memory is permanently erased", "Attention is fully divided", "A reflex is trained"], answer: "Exposure to one stimulus influences the response to another" },
     { prompt: "Which is an example of semantic memory?", options: ["Knowing that Paris is the capital of France", "Remembering your last birthday party", "Riding a bicycle", "Recalling a childhood smell"], answer: "Knowing that Paris is the capital of France" },
-    { prompt: "Working memory is most often associated with which model?", options: ["Baddeley and Hitch", "Freud's id model", "Piaget's stage theory", "Pavlov's conditioning"], answer: "Baddeley and Hitch" }
+    { prompt: "Working memory is most often associated with which model?", options: ["Baddeley and Hitch", "Freud's id model", "Piaget's stage theory", "Pavlov's conditioning"], answer: "Baddeley and Hitch" },
+    { prompt: "The method of loci (memory palace) works by:", options: ["Linking items to locations in a familiar place", "Repeating items out loud", "Writing items in alphabetical order", "Sleeping right after learning"], answer: "Linking items to locations in a familiar place" },
+    { prompt: "The spacing effect says learning is better when:", options: ["Study is spread out over time", "All study is done in one long session", "Items are only read once", "You study while distracted"], answer: "Study is spread out over time" },
+    { prompt: "Why does retrieval practice (self-testing) improve memory?", options: ["It strengthens the pathways used to retrieve information", "It removes the need to remember", "It increases sensory input", "It eliminates forgetting"], answer: "It strengthens the pathways used to retrieve information" },
+    { prompt: "The peg-word technique links list items to:", options: ["Pre-learned rhyming number words, like one-bun and two-shoe", "A random list of colours", "Musical notes", "Alphabet letters only"], answer: "Pre-learned rhyming number words, like one-bun and two-shoe" },
+    { prompt: "Making the word ROYGBIV to remember rainbow colours is an example of:", options: ["An acronym mnemonic", "The method of loci", "Dual coding", "Priming"], answer: "An acronym mnemonic" },
+    { prompt: "Dual coding theory suggests memory improves when information is encoded as:", options: ["Both verbal and visual representations", "Only numbers", "Only repeated text", "Only sounds"], answer: "Both verbal and visual representations" },
+    { prompt: "Elaborative encoding works by:", options: ["Connecting new information to existing knowledge and meaning", "Repeating the same word many times", "Ignoring the meaning of the material", "Reading faster"], answer: "Connecting new information to existing knowledge and meaning" },
+    { prompt: "Interleaved practice means:", options: ["Mixing different types of problems in one session", "Practising one skill only", "Studying in complete silence", "Doing the same question repeatedly"], answer: "Mixing different types of problems in one session" },
+    { prompt: "The keyword method is mainly used for learning:", options: ["Vocabulary in a foreign language", "Driving routes", "Musical scales", "Mathematical proofs"], answer: "Vocabulary in a foreign language" },
+    { prompt: "Massed practice means:", options: ["Cramming many study hours into one session", "Spreading study across several days", "Testing yourself after each topic", "Using pictures instead of words"], answer: "Cramming many study hours into one session" },
+    { prompt: "Maintenance rehearsal (repeating an item) is most useful for:", options: ["Holding information briefly in working memory", "Building long-term meaningful memories", "Remembering visual scenes only", "Forgetting information faster"], answer: "Holding information briefly in working memory" },
+    { prompt: "According to levels of processing theory, memory is strongest when information is processed:", options: ["Deeply, focusing on meaning", "Shallowly, focusing on sound or appearance", "Without attention", "Only through repetition"], answer: "Deeply, focusing on meaning" },
+    { prompt: "The picture superiority effect means that:", options: ["Pictures are usually remembered better than words", "Pictures are never forgotten", "Pictures use no working memory", "Words are always remembered wrongly"], answer: "Pictures are usually remembered better than words" },
+    { prompt: "Context-dependent memory means recall is better when:", options: ["The recall setting matches the learning setting", "You learn only in a noisy place", "You change rooms often", "Information is written in capital letters"], answer: "The recall setting matches the learning setting" },
+    { prompt: "Which technique turns new information into a story or a vivid image to remember it?", options: ["Mnemonic imagery", "Massed practice", "Shadowing", "Priming"], answer: "Mnemonic imagery" }
   ];
 
   const $ = (id) => document.getElementById(id);
@@ -116,7 +132,7 @@
     let ink;
     do { ink = pick(COLORS); } while (ink.name === word.name);
     const others = shuffle(COLORS.filter(c => c.name !== ink.name)).slice(0, ATTENTION_OPTIONS[diff] - 1).map(c => c.name);
-    return { type: 'attention', prompt: 'Ignore the word. Click the INK colour it is written in.', word: word.name, inkHex: ink.hex, answer: ink.name, options: shuffle([ink.name, ...others]) };
+    return { type: 'attention', showMs: ATTENTION_SHOW[diff], prompt: 'Ignore the word. Click the INK colour it is written in.', word: word.name, inkHex: ink.hex, answer: ink.name, options: shuffle([ink.name, ...others]) };
   }
 
   function buildQuestions(diff) {
@@ -146,7 +162,7 @@
     if (q.type === 'memory') {
       body = `<div class="sequence" id="seq">${q.sequence}</div><p class="hint" id="hint">Memorize it. It hides in a moment.</p>`;
     } else if (q.type === 'attention') {
-      body = `<div class="sequence" style="color:${q.inkHex}">${q.word}</div>`;
+      body = `<div class="sequence" id="stim" style="color:${q.inkHex}">${q.word}</div><p class="hint" id="hint">Look at the word. Options appear once it hides.</p>`;
     } else {
       body = `<div class="timer"><div class="timer-bar" id="tbar"></div></div><p class="hint" id="ttext">${QUIZ_SECONDS}s</p>`;
     }
@@ -170,11 +186,14 @@
       });
     };
 
-    if (q.type === 'memory') {
-      // Options stay hidden while the sequence is visible; they appear once it hides.
+    if (q.type === 'memory' || q.type === 'attention') {
+      // Options stay hidden while the stimulus is visible; they appear once it hides.
+      const stimId = q.type === 'memory' ? 'seq' : 'stim';
       timers.push(setTimeout(() => {
-        $('seq').textContent = '•••';
-        $('hint').textContent = 'Now choose the sequence you remember.';
+        $(stimId).textContent = '•••';
+        $('hint').textContent = q.type === 'memory'
+          ? 'Now choose the sequence you remember.'
+          : 'Now click the INK colour, not the word.';
         drawOptions();
         startedAt = performance.now();
       }, q.showMs));
@@ -218,6 +237,7 @@
       else if (b.dataset.value === value) b.classList.add('wrong');
     });
     if (q.type === 'memory' && $('seq')) $('seq').textContent = q.sequence;
+    if (q.type === 'attention' && $('stim')) $('stim').textContent = q.word;
 
     const fb = $('fb');
     if (value === null) { fb.textContent = `Time's up. Correct answer: ${q.answer}`; fb.className = 'feedback bad'; }
