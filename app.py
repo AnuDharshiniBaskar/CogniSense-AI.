@@ -15,7 +15,7 @@ DB_PATH = os.path.join(DATA_DIR, "cognisense.db")
 #   Windows (cmd):  set COGNISENSE_HOST_PIN=your-secret
 #   Windows (PS):   $env:COGNISENSE_HOST_PIN="your-secret"
 HOST_PIN = os.environ.get("COGNISENSE_HOST_PIN", "cognisense-host")
-ALLOWED_TASKS = {"Memory", "Attention", "Quiz"}
+ALLOWED_TASKS = {"Memory", "Attention", "Words", "Shapes", "Grid"}
 
 
 def init_db():
