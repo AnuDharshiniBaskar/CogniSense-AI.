@@ -51,3 +51,15 @@ Journal entries are stored in browser localStorage on the user's device. They ar
 - Within one session (until you reset stats) no question repeats: number sequences, colour pairs, word lists, shape and colour combinations, maths problems, pattern puzzles, odd-one-out sets and grid patterns are tracked.
 - Number sequences use different digits inside each sequence.
 - Word bank has about 170 words, 8 colours, 8 shapes and 18 odd-one-out sets.
+
+## Reaction time game
+- Wait for the signal, then tap the GREEN box as fast as you can. Red is a trap: do not tap it.
+- Tapping before the signal loses the round. Hard mode has shorter waits, more red signals and a shorter time window.
+
+## Host dashboard
+- Open `/host` on the server (for example http://127.0.0.1:5000/host). Enter the host PIN.
+- Every completed round is saved with the player's nickname (or "Guest"), game, difficulty, result and points.
+- The host sees names only on this page. Players never see other players' results.
+- Set the PIN before running: `COGNISENSE_HOST_PIN=your-secret` (Windows cmd: `set COGNISENSE_HOST_PIN=your-secret`). Default is `cognisense-host`.
+- Results are stored in `cognisense.db`. On Render, set `COGNISENSE_DATA_DIR` to a persistent disk path to keep them after restarts.
+- The host page does not show dates.
