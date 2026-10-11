@@ -292,7 +292,7 @@ function renderJournal(){
     const article=document.createElement("article"); article.className="journal-entry";
     const top=document.createElement("div"); top.className="entry-top";
     const mood=document.createElement("span"); mood.className="entry-mood"; mood.textContent=entry.mood;
-    const date=document.createElement("span"); date.textContent=entry.date; top.append(mood,date);
+    top.append(mood);
     const p=document.createElement("p"); p.textContent=entry.text;
     const del=document.createElement("button"); del.className="entry-delete"; del.type="button"; del.textContent="Delete note";
     del.addEventListener("click",()=>{saveJournal(loadJournal().filter(x=>x.id!==entry.id));renderJournal();updateStats();});
@@ -300,9 +300,8 @@ function renderJournal(){
   });
   updateStats();
 }
-$("journalForm").addEventListener("submit",e=>{e.preventDefault();const text=$("journalText").value.trim();if(!text){toast("Write a short reflection before saving.");$("journalText").focus();return}const entries=loadJournal();entries.push({id:`${Date.now()}-${rand(999999)}`,mood:$("journalMood").value,text,date:new Date().toLocaleString()});if(saveJournal(entries)){ $("journalText").value="";renderJournal();toast("Reflection saved on this device.")}});
+$("journalForm").addEventListener("submit",e=>{e.preventDefault();const text=$("journalText").value.trim();if(!text){toast("Write a short reflection before saving.");$("journalText").focus();return}const entries=loadJournal();entries.push({id:`${Date.now()}-${rand(999999)}`,mood:$("journalMood").value,text});if(saveJournal(entries)){ $("journalText").value="";renderJournal();toast("Reflection saved on this device.")}});
 $("clearJournal").addEventListener("click",()=>{if(!loadJournal().length){toast("There are no notes to clear.");return}if(confirm("Delete all saved reflections from this browser?")){saveJournal([]);renderJournal();toast("Journal cleared.")}});
 $("resetProgress").addEventListener("click",()=>{if(!confirm("Reset your session statistics?"))return;answered=0;correct=0;completed=0;focusMinutes=0;totalPoints=0;streak=0;bestStreak=0;used.clear();const mt=$("motivation");if(mt)mt.hidden=true;renderScore();updateStats();toast("Session statistics reset.")});
-$("todayLabel").textContent=new Date().toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}).toUpperCase();
 updateName();renderJournal();updateStats();renderScore();
 })();
