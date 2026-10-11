@@ -145,3 +145,44 @@
 .cell.lit { background: var(--accent); border-color: var(--accent); }
 .cell.good { background: var(--good-soft); border-color: var(--good); }
 .cell.bad { background: var(--bad-soft); border-color: var(--bad); }
+
+/* ---- Multi-colour theme ---- */
+body {
+  background: linear-gradient(135deg, #f5f3ff 0%, #fdf2f8 35%, #ecfeff 70%, #fefce8 100%) fixed;
+}
+header.site {
+  background: linear-gradient(90deg, #5b4fe0, #e0467c, #f59e0b);
+  border-bottom: none;
+}
+header.site .brand, header.site .brand span { color: #fff; }
+.hero h1 {
+  background: linear-gradient(90deg, #5b4fe0, #e0467c, #f59e0b, #10b981);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.primary {
+  background: linear-gradient(90deg, #5b4fe0, #e0467c);
+  border-color: transparent;
+}
+.task-btn[data-task="Memory"]   { border-top: 4px solid #5b4fe0; }
+.task-btn[data-task="Attention"]{ border-top: 4px solid #e0467c; }
+.task-btn[data-task="Words"]    { border-top: 4px solid #f59e0b; }
+.task-btn[data-task="Shapes"]   { border-top: 4px solid #10b981; }
+.task-btn[data-task="Grid"]     { border-top: 4px solid #0ea5e9; }
+.task-btn.active[data-task="Memory"]    { background: #ede9fe; border-color: #5b4fe0; }
+.task-btn.active[data-task="Attention"] { background: #fce7f3; border-color: #e0467c; }
+.task-btn.active[data-task="Words"]     { background: #fef3c7; border-color: #f59e0b; }
+.task-btn.active[data-task="Shapes"]    { background: #d1fae5; border-color: #10b981; }
+.task-btn.active[data-task="Grid"]      { background: #e0f2fe; border-color: #0ea5e9; }
+.option:hover:not(:disabled) { border-color: #e0467c; background: #fdf2f8; }
+.progress-text { color: #e0467c; font-weight: 600; }
+.result .score {
+  background: linear-gradient(90deg, #5b4fe0, #e0467c, #f59e0b);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.timer-bar { background: linear-gradient(90deg, #5b4fe0, #e0467c); }
+.cell:nth-child(4n+1).lit { background: #5b4fe0; border-color: #5b4fe0; }
+.cell:nth-child(4n+2).lit { background: #e0467c; border-color: #e0467c; }
+.cell:nth-child(4n+3).lit { background: #f59e0b; border-color: #f59e0b; }
+.cell:nth-child(4n+4).lit { background: #10b981; border-color: #10b981; }
+.card, section.card { border-top: 3px solid #5b4fe0; }
+.about h2 { color: #5b4fe0; }
