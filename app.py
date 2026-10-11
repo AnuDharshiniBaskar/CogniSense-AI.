@@ -3,7 +3,7 @@ import os
 import sqlite3
 from datetime import datetime
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 
 app = Flask(__name__)
 # On Render with a persistent disk, set COGNISENSE_DATA_DIR to the disk mount path.
@@ -48,6 +48,15 @@ def host_authorized():
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/sw.js")
+def service_worker():
+    # Served from the root so the service worker can control the whole site.
+    resp = send_from_directory(app.static_folder, "sw.js", mimetype="application/javascript")
+    resp.headers["Service-Worker-Allowed"] = "/"
+    resp.headers["Cache-Control"] = "no-cache"
+    return resp
 
 
 @app.route("/host")
