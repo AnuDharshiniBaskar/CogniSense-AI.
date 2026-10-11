@@ -41,10 +41,9 @@
     { sym: '★', name: 'Star' }, { sym: '●', name: 'Circle' }, { sym: '■', name: 'Square' },
     { sym: '▲', name: 'Triangle' }, { sym: '◆', name: 'Diamond' }, { sym: '♥', name: 'Heart' }
   ];
-  const WORD_POOL = ['apple','river','candle','pencil','garden','bridge','window','planet','violin','tiger',
-    'castle','ticket','mirror','anchor','basket','coin','desert','feather','guitar','hammer',
-    'island','jacket','kettle','ladder','magnet','needle','orange','pillow','rocket','saddle',
-    'tunnel','valley','wallet','yogurt','zipper','bottle','camera','dragon','forest','lantern'];
+  const WORD_POOL = [
+    'apple', 'river', 'candle', 'pencil', 'garden', 'bridge', 'window', 'planet', 'violin', 'tiger', 'castle', 'ticket', 'mirror', 'anchor', 'basket', 'coin', 'desert', 'feather', 'guitar', 'hammer', 'island', 'jacket', 'kettle', 'ladder', 'magnet', 'needle', 'orange', 'pillow', 'rocket', 'saddle', 'tunnel', 'valley', 'wallet', 'yogurt', 'zipper', 'bottle', 'camera', 'dragon', 'forest', 'lantern', 'button', 'canyon', 'meadow', 'pepper', 'blanket', 'compass', 'diamond', 'engine', 'falcon', 'glacier', 'harbor', 'insect', 'jungle', 'kitchen', 'lemon', 'marble', 'napkin', 'oyster', 'parrot', 'quartz', 'rabbit', 'saucer', 'timber', 'umbrella', 'velvet', 'walnut', 'yacht', 'zebra', 'acorn', 'beacon', 'cactus', 'donkey', 'emerald', 'fountain', 'goblet', 'helmet', 'iguana', 'jigsaw', 'kayak', 'lobster', 'muffin', 'nickel', 'octopus', 'pebble', 'quilt', 'raccoon', 'sandal', 'thimble', 'urchin', 'vanilla', 'wagon', 'basil', 'cloud', 'dolphin', 'eagle', 'ferry', 'goose', 'hedge', 'ivory', 'jewel', 'lilac', 'mango', 'nectar', 'otter', 'pistol', 'ribbon', 'scarf', 'tulip', 'cabin'
+  ];
 
   // ---------- Helpers ----------
   const $ = (id) => document.getElementById(id);
@@ -70,13 +69,32 @@
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
   function clearAll() { timers.forEach(clearTimeout); timers = []; }
 
-  // ---------- Question generators ----------
-  function makeMemory(diff) {
+  // ---------- Question generators (no repeats within one round) ----------
+  const COLOR_NAMES = COLORS.map(c => c.name);
+  const colorOf = (name) => COLORS.find(c => c.name === name);
+
+  // Pick an item not yet used in this round for `key`; exclude list avoids repeats inside a question.
+  function uniquePick(pool, ctx, key, exclude = []) {
+    const used = (ctx.used[key] ||= new Set());
+    let cands = pool.filter(x => !used.has(x) && !exclude.includes(x));
+    if (!cands.length) { used.clear(); cands = pool.filter(x => !exclude.includes(x)); }
+    const choice = pick(cands);
+    used.add(choice);
+    return choice;
+  }
+
+  function makeMemory(diff, ctx) {
     const cfg = MEMORY_LEVELS[diff];
     const pool = cfg.chars === 'mixed' ? MIXED : DIGITS;
-    const items = shuffle(pool).slice(0, cfg.length);
-    const target = cfg.reverse ? [...items].reverse() : items;
-    const answer = target.join(' ');
+    const seen = (ctx.used.seq ||= new Set());
+    let items, target, answer;
+    for (let t = 0; t < 300; t++) {
+      items = shuffle(pool).slice(0, cfg.length);
+      target = cfg.reverse ? [...items].reverse() : items;
+      answer = target.join(' ');
+      if (!seen.has(answer)) break;
+    }
+    seen.add(answer);
     const wrong = new Set();
     if (cfg.reverse) wrong.add(items.join(' '));
     for (let k = 0; k < cfg.length - 1; k++) {
@@ -101,26 +119,30 @@
     };
   }
 
-  function makeAttention(diff) {
+  function makeAttention(diff, ctx) {
     const cfg = ATTENTION_LEVELS[diff];
-    const word = pick(COLORS);
-    let ink;
-    do { ink = pick(COLORS); } while (ink.name === word.name);
+    // Round deck: each ink colour appears once, and the word is the next colour in the deck,
+    // so no colour repeats as an ink or as a word within a round, and word never equals its ink.
+    const deck = (ctx.attDeck ||= { inks: shuffle(COLOR_NAMES), n: 0 });
+    const i = deck.n++;
+    const inkName = deck.inks[i % deck.inks.length];
+    const wordName = deck.inks[(i + 1) % deck.inks.length];
     const askWord = cfg.mixed && Math.random() < 0.5;
-    const answer = askWord ? word.name : ink.name;
-    const others = shuffle(COLORS.map(c => c.name).filter(n => n !== answer)).slice(0, cfg.options - 1);
+    const answer = askWord ? wordName : inkName;
+    const others = shuffle(COLOR_NAMES.filter(n => n !== answer)).slice(0, cfg.options - 1);
     return {
-      type: 'attention', showMs: cfg.showMs, word: word.name, inkHex: ink.hex, askWord,
+      type: 'attention', showMs: cfg.showMs, word: wordName, inkHex: colorOf(inkName).hex, askWord,
       prompt: askWord ? 'Ignore the colour. Click the WORD it says.' : 'Ignore the word. Click the INK colour.',
       answer, options: shuffle([answer, ...others])
     };
   }
 
-  function makeWords(diff) {
+  function makeWords(diff, ctx) {
     const cfg = WORD_LEVELS[diff];
-    const all = shuffle(WORD_POOL);
-    const list = all.slice(0, cfg.count);
-    const outside = all.slice(cfg.count, cfg.count + 3);
+    const take = [];
+    for (let i = 0; i < cfg.count + 3; i++) take.push(uniquePick(WORD_POOL, ctx, 'word', take));
+    const list = take.slice(0, cfg.count);
+    const outside = take.slice(cfg.count);
     let answer, options, prompt;
     if (cfg.hard) {
       answer = outside[0];
@@ -134,21 +156,26 @@
     return { type: 'words', list, showMs: cfg.showMs, prompt, answer, options };
   }
 
-  function makeShapes(diff) {
+  function makeShapes(diff, ctx) {
     const cfg = SHAPE_LEVELS[diff];
-    const shapes = shuffle(SHAPES).slice(0, cfg.count);
-    const items = shapes.map(sh => ({ shape: sh, color: pick(COLORS) }));
-    const target = pick(items);
+    const seen = (ctx.used.label ||= new Set());
+    let items, correct;
+    for (let t = 0; t < 300; t++) {
+      const shapes = shuffle(SHAPES).slice(0, cfg.count);
+      const rowColors = [];
+      shapes.forEach(() => rowColors.push(uniquePick(COLOR_NAMES, ctx, 'shapeColor', rowColors)));
+      items = shapes.map((sh, i) => ({ shape: sh, color: colorOf(rowColors[i]) }));
+      const target = pick(items);
+      correct = `${cap(target.color.name)} ${target.shape.name}`;
+      if (!seen.has(correct)) { seen.add(correct); break; }
+    }
     const label = (c, sh) => `${cap(c.name)} ${sh.name}`;
-    const correct = label(target.color, target.shape);
     const wrong = new Set();
-    // Tricky options: a shape that WAS shown, but with a different colour
     shuffle(items).slice(0, cfg.trick).forEach(it => {
       let c;
       do { c = pick(COLORS); } while (c.name === it.color.name);
       wrong.add(label(c, it.shape));
     });
-    // Fill with combinations that were not shown at all
     for (let g = 0; wrong.size < 3 && g < 500; g++) {
       const sh = pick(SHAPES), c = pick(COLORS);
       const shown = items.some(it => it.shape === sh && it.color.name === c.name);
@@ -164,14 +191,21 @@
     };
   }
 
-  function makeGrid(diff) {
+  function makeGrid(diff, ctx) {
     const cfg = GRID_LEVELS[diff];
     const cells = cfg.size * cfg.size;
-    const seq = [];
-    while (seq.length < cfg.length) {
-      const c = randInt(cells);
-      if (!seq.includes(c)) seq.push(c);
+    const seen = (ctx.used.grid ||= new Set());
+    let seq, key;
+    for (let t = 0; t < 300; t++) {
+      seq = [];
+      while (seq.length < cfg.length) {
+        const c = randInt(cells);
+        if (!seq.includes(c)) seq.push(c);
+      }
+      key = seq.join(',');
+      if (!seen.has(key)) break;
     }
+    seen.add(key);
     return { type: 'grid', size: cfg.size, seq, flashMs: cfg.flashMs,
              prompt: 'Watch the blocks light up, then tap them in the same order.' };
   }
@@ -182,8 +216,9 @@
   function startRound() {
     clearAll();
     const diff = $('difficulty').value;
+    const ctx = { used: {} };
     session = {
-      questions: Array.from({ length: SESSION_LENGTH }, () => MAKERS[task](diff)),
+      questions: Array.from({ length: SESSION_LENGTH }, () => MAKERS[task](diff, ctx)),
       current: 0, correct: 0, times: [],
       participant: $('name').value.trim() || 'Guest', task, difficulty: diff
     };
