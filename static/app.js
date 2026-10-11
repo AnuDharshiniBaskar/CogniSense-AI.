@@ -2,7 +2,7 @@
 "use strict";
 const $ = id => document.getElementById(id);
 const cards = [...document.querySelectorAll(".activity-card")];
-const labels = {sequence:["Number sequence","MEMORY EXERCISE"],stroop:["Colour focus","ATTENTION EXERCISE"],words:["Word recall","RECALL EXERCISE"],shape:["Shape memory","VISUAL MEMORY"],grid:["Pattern grid","PATTERN EXERCISE"],math:["Quick Maths","PROCESSING EXERCISE"],oddone:["Odd One Out","LOGIC EXERCISE"],sequencepattern:["Pattern Detective","REASONING EXERCISE"]};
+const labels = {sequence:["Number sequence","MEMORY EXERCISE"],stroop:["Colour focus","ATTENTION EXERCISE"],words:["Word recall","RECALL EXERCISE"],shape:["Shape memory","VISUAL MEMORY"],grid:["Pattern grid","PATTERN EXERCISE"],math:["Quick Maths","PROCESSING EXERCISE"],oddone:["Odd One Out","LOGIC EXERCISE"],sequencepattern:["Pattern Detective","REASONING EXERCISE"],react:["Reaction time","REACTION EXERCISE"]};
 const colours=[{name:"Red",hex:"#d93b48"},{name:"Blue",hex:"#2775c9"},{name:"Green",hex:"#25835d"},{name:"Orange",hex:"#c86b14"},{name:"Purple",hex:"#7b4fd6"},{name:"Teal",hex:"#13877f"},{name:"Pink",hex:"#c2407f"},{name:"Brown",hex:"#7a5230"}];
 const SHAPES=[{s:"◆",n:"diamond"},{s:"●",n:"circle"},{s:"▲",n:"triangle"},{s:"■",n:"square"},{s:"★",n:"star"},{s:"✚",n:"cross"},{s:"♥",n:"heart"},{s:"⬡",n:"hexagon"}];
 const DIGITS="0123456789".split("");
@@ -34,7 +34,7 @@ cards.forEach(card=>card.addEventListener("click",()=>{selected=card.dataset.gam
 $("contrastToggle").addEventListener("click",e=>{const on=document.body.classList.toggle("high-contrast");e.currentTarget.setAttribute("aria-pressed",String(on));e.currentTarget.innerHTML=on?"◐ &nbsp; Standard contrast":"◐ &nbsp; High contrast"});
 $("menuToggle").addEventListener("click",()=>{const open=$("sidebar").classList.toggle("open");$("menuToggle").setAttribute("aria-expanded",String(open))});
 document.querySelectorAll(".nav-item").forEach(a=>a.addEventListener("click",()=>{document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active",n===a));$("pageName").textContent=a.textContent.trim();$("sidebar").classList.remove("open");$("menuToggle").setAttribute("aria-expanded","false")}));
-function startRound(){roundToken++;locked=false;$("roundPill").textContent="IN PROGRESS";$("gameTitle").textContent=labels[selected][0];$("gameCategory").textContent=labels[selected][1];say(`Good luck${safeNickname()?", "+safeNickname():""}! Take your time.`);({sequence:startSequence,stroop:startStroop,words:startWords,shape:startShape,grid:startGrid,math:startMath,oddone:startOddOne,sequencepattern:startPatternDetective})[selected]()}
+function startRound(){roundToken++;locked=false;$("roundPill").textContent="IN PROGRESS";$("gameTitle").textContent=labels[selected][0];$("gameCategory").textContent=labels[selected][1];say(`Good luck${safeNickname()?", "+safeNickname():""}! Take your time.`);({sequence:startSequence,stroop:startStroop,words:startWords,shape:startShape,grid:startGrid,math:startMath,oddone:startOddOne,sequencepattern:startPatternDetective,react:startReact})[selected]()}
 $("startButton").addEventListener("click",startRound);
 let totalPoints=0,streak=0,bestStreak=0,roundToken=0;
 const BEST_KEY="cognisense-best";
@@ -83,6 +83,7 @@ function score(ok,explanation){
  if(ok){correct++;streak++;bestStreak=Math.max(bestStreak,streak)}else{streak=0}
  const pts=pointsFor(ok);
  totalPoints+=pts;
+ saveResult(selected,ok,pts,explanation);
  updateStats();
  $("roundPill").textContent="ROUND COMPLETE";
  say(`${ok?"Correct! ":"Good try! "}${explanation}`);
@@ -275,6 +276,42 @@ function startPatternDetective(){
   setGame(`<div class="game-prompt"><h3>What comes next?</h3><div class="choice-grid" id="patternChoices"></div></div>`);
   choiceButtons("patternChoices",item.opts,n=>String(n),n=>score(n===item.answer,`Answer: ${item.answer}. ${item.why}`));
  },ms);
+}
+
+function saveResult(game,ok,pts,detail){
+ const participant=safeNickname()||"Guest";
+ fetch("/api/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({participant,game,difficulty:DIFF_NAMES[level()],correct:ok?1:0,points:pts,detail:String(detail).slice(0,200)})}).catch(()=>{});
+}
+/* REACTION TIME: tap the GREEN box as fast as you can. Red is a trap. Tapping too early loses. */
+const REACT={easy:{wait:[2000,4000],window:1200,decoy:0.15},medium:{wait:[1500,4000],window:900,decoy:0.35},hard:{wait:[1000,3500],window:700,decoy:0.5}};
+function startReact(){
+ const cfg=REACT[DIFF_NAMES[level()]],token=roundToken;
+ const wait=cfg.wait[0]+rand(cfg.wait[1]-cfg.wait[0]);
+ let colour="",goAt=0,gone=false,endTimer=null;
+ setGame(`<div class="game-prompt"><h3>Reaction test</h3><p>Wait for the signal. Tap the GREEN box as fast as you can. Do NOT tap RED.</p><button class="react-box" id="reactBox" type="button" style="background:#6b7385;color:#fff;width:100%;min-height:160px;border:0;border-radius:16px;font-size:22px;font-weight:700;cursor:pointer">Wait…</button><p id="reactStatus" role="status">Get ready…</p></div>`);
+ const goTimer=setTimeout(()=>{
+  if(token!==roundToken||gone)return;
+  const b=$("reactBox");if(!b)return;
+  colour=Math.random()<cfg.decoy?"red":"green";
+  goAt=performance.now();
+  b.style.background=colour==="red"?"#d93b48":"#25835d";
+  b.textContent=colour==="red"?"RED: do not tap":"GREEN: TAP!";
+  $("reactStatus").textContent="Now!";
+  endTimer=setTimeout(()=>{
+   if(token!==roundToken||gone)return;
+   gone=true;
+   if(colour==="red")score(true,"Correct! You did not tap the red box.");
+   else score(false,`Too slow. Tap the green box within ${cfg.window} ms.`);
+  },cfg.window);
+ },wait);
+ $("reactBox").addEventListener("click",()=>{
+  if(token!==roundToken||locked||gone)return;
+  gone=true;clearTimeout(goTimer);clearTimeout(endTimer);
+  if(!colour){score(false,"Too early! Wait for the signal before you tap.");return}
+  if(colour==="red"){score(false,"You tapped RED. Only tap the green box.");return}
+  const rt=Math.round(performance.now()-goAt);
+  score(true,`Reaction time: ${rt} ms.`);
+ });
 }
 // Focus timer
 function renderTimer(){const m=Math.floor(timerRemaining/60),s=timerRemaining%60;$("timerDisplay").textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;const p=timerTotal?1-timerRemaining/timerTotal:0;$("timerRing").style.background=`conic-gradient(var(--purple) ${p*360}deg,#eceaf7 ${p*360}deg)`;$("timerState").textContent=timerRunning?"FOCUS IN PROGRESS":timerRemaining===0?"SESSION COMPLETE":"READY TO FOCUS";$("timerStart").textContent=timerRunning?"Pause timer":timerRemaining<timerTotal?"Resume timer":"Start timer"}
