@@ -4,12 +4,12 @@
 
   // ---------- Difficulty settings ----------
   const MEMORY_LEVELS = {
-    Easy:     { length: 3, showMs: 1500, reverse: false, chars: 'digits' },
-    Moderate: { length: 4, showMs: 1000, reverse: false, chars: 'digits' },
+    Easy:     { length: 3, showMs: 1000, reverse: false, chars: 'digits' },
+    Moderate: { length: 4, showMs: 800, reverse: false, chars: 'digits' },
     Hard:     { length: 6, showMs: 700,  reverse: true,  chars: 'mixed' }
   };
   const ATTENTION_LEVELS = {
-    Easy:     { options: 3, showMs: 1200, mixed: false },
+    Easy:     { options: 3, showMs: 1000, mixed: false },
     Moderate: { options: 4, showMs: 800,  mixed: false },
     Hard:     { options: 6, showMs: 500,  mixed: true  }
   };
