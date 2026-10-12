@@ -1,1 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f6f7fb"><meta name="description" content="CogniSense AI: accessible cognitive science games, focus tools, learning notes and progress tracking.">
+<title>CogniSense AI — Mind Lab</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="#home"><span class="brand-icon" aria-hidden="true">✳</span><span>CogniSense <small>AI MIND LAB</small></span></a>
+  <p class="nav-label">WORKSPACE</p>
+  <nav aria-label="Main navigation">
+    <a class="nav-item active" href="#home"><span aria-hidden="true">⌂</span> Overview</a>
+    <a class="nav-item" href="#activities"><span aria-hidden="true">◈</span> Brain activities</a>
+    <a class="nav-item" href="#focus"><span aria-hidden="true">◷</span> Focus room</a>
+    <a class="nav-item" href="#journal"><span aria-hidden="true">✎</span> Learning journal</a>
+    <a class="nav-item" href="#progress"><span aria-hidden="true">▥</span> Progress</a>
+  </nav>
+  <div class="sidebar-bottom"><div class="mini-orb" aria-hidden="true">✦</div><strong>Small steps matter.</strong><p>Make a little space for your mind today.</p><button class="side-contrast" id="contrastToggle" type="button" aria-pressed="false">◐ &nbsp; High contrast</button></div>
+</aside>
+<div class="app-main">
+<header class="topbar">
+  <button class="mobile-menu" id="menuToggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+  <div class="breadcrumb">Workspace <span>/</span> <strong id="pageName">Overview</strong></div>
+  <div class="top-actions"><span class="today-chip" id="todayLabel">YOUR MIND, YOUR PACE</span><button class="avatar" id="profileButton" type="button" aria-label="Set your nickname">A</button></div>
+</header>
+<main id="main">
+<section id="home" class="hero">
+  <div class="hero-copy"><p class="eyebrow"><span class="pulse"></span> YOUR PERSONAL COGNITIVE PLAYGROUND</p>
+  <h1>Make room for<br><span>a brighter mind.</span></h1>
+  <p>Explore how you focus, remember and learn — one small challenge at a time. No pressure, just progress.</p>
+  <div class="hero-actions"><a class="button primary" href="#activities">Start exploring <span aria-hidden="true">↗</span></a><a class="button secondary" href="#focus">Open focus room</a></div>
+  <div class="hero-trust"><span aria-hidden="true">✓</span> Private by design <span class="trust-dot">·</span> Built for curious minds</div></div>
+  <div class="hero-visual" aria-hidden="true"><div class="halo halo-a"></div><div class="halo halo-b"></div><div class="orb-card"><div class="orb-large">✳</div><div class="orb-caption">MIND IN<br>MOTION</div><div class="orb-stat"><span>✦</span><div><strong>Stay curious</strong><small>Every day is a new start</small></div></div></div><span class="float-tag tag-focus">◉ Focus</span><span class="float-tag tag-memory">◇ Memory</span><span class="float-tag tag-growth">↗ Growth</span></div>
+</section>
 
+<section class="welcome-row">
+  <div><p class="eyebrow">YOUR SPACE</p><h2 id="welcomeTitle">Welcome back, curious mind <span>✦</span></h2><p class="muted">Pick a path that fits how you feel right now.</p></div>
+  <button class="button secondary compact" id="editName" type="button">Edit nickname</button>
+</section>
+<section class="quick-stats" aria-label="Session summary">
+  <article class="metric"><div class="metric-top"><span>Activities completed</span><span class="metric-icon purple">✓</span></div><strong id="activitiesStat">0</strong><small>Rounds finished this session</small></article>
+  <article class="metric"><div class="metric-top"><span>Answer accuracy</span><span class="metric-icon green">◎</span></div><strong id="accuracyStat">—</strong><small>Based on answered rounds</small></article>
+  <article class="metric"><div class="metric-top"><span>Focus minutes</span><span class="metric-icon orange">◷</span></div><strong id="focusStat">0</strong><small>Time completed in focus room</small></article>
+  <article class="metric"><div class="metric-top"><span>Journal entries</span><span class="metric-icon blue">✎</span></div><strong id="journalStat">0</strong><small>Your saved reflections</small></article>
+</section>
+
+<section id="activities" class="section">
+  <div class="section-head"><div><p class="eyebrow">TRAIN YOUR THINKING</p><h2>Brain activities</h2><p class="muted">Short games to explore memory, attention and patterns.</p></div><span class="section-count">09 ACTIVITIES</span></div>
+  <div class="activity-grid">
+    <button class="activity-card selected" type="button" data-game="sequence" aria-pressed="true"><span class="game-icon purple">123</span><span class="game-title">Number sequence</span><span class="game-desc">Remember digits and repeat them in order.</span><span class="game-meta">MEMORY <b>↗</b></span></button>
+    <button class="activity-card" type="button" data-game="stroop" aria-pressed="false"><span class="game-icon orange">Aa</span><span class="game-title">Colour focus</span><span class="game-desc">Focus on ink colour, not the word itself.</span><span class="game-meta">ATTENTION <b>↗</b></span></button>
+    <button class="activity-card" type="button" data-game="words" aria-pressed="false"><span class="game-icon green">✎</span><span class="game-title">Word recall</span><span class="game-desc">Recall a word from a short list.</span><span class="game-meta">RECALL <b>↗</b></span></button>
+    <button class="activity-card" type="button" data-game="shape" aria-pressed="false"><span class="game-icon blue">◆</span><span class="game-title">Shape memory</span><span class="game-desc">Remember the shape and its colour.</span><span class="game-meta">VISUAL MEMORY <b>↗</b></span></button>
+    <button class="activity-card" type="button" data-game="grid" aria-pressed="false"><span class="game-icon pink">▦</span><span class="game-title">Pattern grid</span><span class="game-desc">Repeat highlighted tiles in the right order.</span><span class="game-meta">PATTERNS <b>↗</b></span></button>
+    <button class="activity-card" type="button" data-game="math" aria-pressed="false"><span class="game-icon blue">＋</span><span class="game-title">Quick Maths</span><span class="game-desc">Solve a short mental arithmetic challenge.</span><span class="game-meta">PROCESSING <b>↗</b></span></button>
+    <button class="activity-card" type="button" data-game="oddone" aria-pressed="false"><span class="game-icon orange">◉</span><span class="game-title">Odd One Out</span><span class="game-desc">Spot the item that does not belong.</span><span class="game-meta">LOGIC <b>↗</b></span></button>
+    <button class="activity-card" type="button" data-game="sequencepattern" aria-pressed="false"><span class="game-icon green">↗</span><span class="game-title">Pattern Detective</span><span class="game-desc">Find the missing number in a pattern.</span><span class="game-meta">REASONING <b>↗</b></span></button><button class="activity-card" type="button" data-game="react" aria-pressed="false"><span class="game-icon green">⚡</span><span class="game-title">Reaction time</span><span class="game-desc">Tap the green box fast. Ignore red.</span><span class="game-meta">REACTION <b>↗</b></span></button>
+  </div>
+</section>
+
+<section class="play-layout" aria-label="Activity controls and game">
+  <aside class="panel settings-panel"><p class="eyebrow">MAKE IT YOURS</p><h2>Round settings</h2>
+    <label for="nickname">Nickname <span class="muted">(optional)</span></label><input id="nickname" maxlength="24" autocomplete="nickname" placeholder="Curious mind">
+    <label for="difficulty">Difficulty</label><select id="difficulty"><option value="easy">Easy · Warm up</option><option value="medium" selected>Medium · Balanced</option><option value="hard">Hard · Challenge me</option></select>
+    <button class="button primary full" id="startButton" type="button">Start activity <span aria-hidden="true">→</span></button>
+    <p class="hint">Use Tab to navigate. Press Enter or Space to activate a control.</p>
+  </aside>
+  <section class="panel game-panel" aria-labelledby="gameTitle"><div class="game-header"><div><p class="eyebrow" id="gameCategory">MEMORY EXERCISE</p><h2 id="gameTitle">Number sequence</h2></div><span class="status-pill" id="roundPill">READY</span></div>
+    <div class="score-strip" aria-label="Score"><span>Score <b id="scoreNow">0</b></span><span>Streak <b id="streakNow">0</b></span><span>Best <b id="bestNow">0</b></span></div>
+    <div class="game-stage" id="gameStage"><div class="empty-state"><div class="empty-icon" aria-hidden="true">✦</div><h3>Your next challenge starts here</h3><p>Choose a game and press <strong>Start activity</strong> when you are ready.</p></div></div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite">Your feedback will appear here.</div>
+    <div class="motivation" id="motivation" role="status" aria-live="polite" hidden></div>
+  </section>
+</section>
+
+<section id="focus" class="section focus-section"><div class="section-head"><div><p class="eyebrow">RESET AND REFRESH</p><h2>Focus room</h2><p class="muted">Take a screen break from busy tasks and work in a calm interval.</p></div><span class="section-count">FOCUS TOOL</span></div>
+  <div class="focus-card"><div class="focus-intro"><div class="focus-icon" aria-hidden="true">◷</div><div><h3>One thing at a time.</h3><p class="muted">Choose a timer length. You can pause or stop whenever you need.</p></div></div><div class="timer-area"><div class="timer-ring" id="timerRing"><div><strong id="timerDisplay">05:00</strong><span id="timerState">READY TO FOCUS</span></div></div><div class="timer-controls"><label for="timerLength">Session length</label><select id="timerLength"><option value="1">1 minute · test</option><option value="5" selected>5 minutes · short focus</option><option value="10">10 minutes · deep focus</option><option value="15">15 minutes · long focus</option></select><div class="timer-buttons"><button class="button primary" id="timerStart" type="button">Start timer</button><button class="button secondary" id="timerReset" type="button">Reset</button></div></div></div><p class="hint" id="timerMessage" role="status" aria-live="polite">Ready when you are. Keep this tab open while the timer runs.</p></div>
+</section>
+
+<section id="journal" class="section"><div class="section-head"><div><p class="eyebrow">REFLECT AND LEARN</p><h2>Learning journal</h2><p class="muted">A tiny note can help you notice what works for you.</p></div><span class="section-count">PRIVATE NOTES</span></div>
+  <div class="journal-layout"><form class="panel journal-form" id="journalForm"><label for="journalMood">How are you feeling?</label><select id="journalMood"><option>Curious</option><option>Focused</option><option>Relaxed</option><option>Tired</option><option>Distracted</option><option>Motivated</option></select><label for="journalText">What did you notice today?</label><textarea id="journalText" rows="4" maxlength="500" placeholder="Example: I remembered more when I slowed down…"></textarea><div class="form-foot"><span class="hint">Up to 500 characters · stored on this device</span><button class="button primary" type="submit">Save reflection</button></div></form><div class="panel journal-list-panel"><div class="list-heading"><h3>Recent reflections</h3><button class="text-button" id="clearJournal" type="button">Clear all</button></div><div id="journalList" class="journal-list"><p class="empty-note">Your saved reflections will appear here.</p></div></div></div>
+</section>
+
+<section id="progress" class="section"><div class="section-head"><div><p class="eyebrow">YOUR PERSONAL SNAPSHOT</p><h2>Progress overview</h2><p class="muted">Celebrate practice, not perfection.</p></div><button class="text-button" id="resetProgress" type="button">Reset session stats</button></div>
+  <div class="progress-layout"><div class="panel progress-panel"><h3>Session performance</h3><div class="bar-row"><div><span>Correct answers</span><strong id="correctLabel">0</strong></div><div class="bar"><span id="correctBar"></span></div></div><div class="bar-row"><div><span>Incorrect answers</span><strong id="incorrectLabel">0</strong></div><div class="bar wrong"><span id="incorrectBar"></span></div></div><div class="bar-row"><div><span>Total points</span><strong id="pointsLabel">0</strong></div></div>
+<div class="bar-row"><div><span>Best streak</span><strong id="bestStreakLabel">0</strong></div></div>
+<div class="progress-footnote">The score reflects only the rounds you complete in this browser session.</div></div><div class="panel encouragement"><div class="encouragement-icon" aria-hidden="true">✦</div><p class="eyebrow">A FRIENDLY REMINDER</p><h3>Progress is practice.</h3><p class="muted">Your performance can change with sleep, stress and familiarity. These games are for learning and fun, not a clinical assessment.</p></div></div>
+</section>
+<section class="disclaimer"><span aria-hidden="true">ⓘ</span><p><strong>Educational prototype:</strong> CogniSense AI explores attention, recall and patterns. Scores are informal and are not a medical diagnosis, intelligence score or psychological assessment. Journal entries are stored locally in this browser.</p></section>
+<footer><a class="brand footer-brand" href="#home"><span class="brand-icon" aria-hidden="true">✳</span><span>CogniSense <small>AI MIND LAB</small></span></a><span>Made for curious minds · Educational prototype</span><a href="#home">Back to top ↑</a></footer>
+</main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body></html>
